@@ -1,4 +1,5 @@
-import { getPreferences, getTodayTotals, getMacroTrend, getRecentFoodEntries } from "@/lib/queries";
+import Link from "next/link";
+import { getPreferences, getTodayTotals, getMacroTrend, getRecentFoodEntries, getWeeklyStats, getInsightCount } from "@/lib/queries";
 import { addFoodEntry, deleteFoodEntry } from "@/lib/actions";
 import { StatCard } from "@/components/StatCard";
 import { MacroTrendChart } from "@/components/MacroTrendChart";
@@ -7,11 +8,13 @@ import { inputClass, buttonClass, cardClass, headingClass, badgeClass } from "@/
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [prefs, totals, trend, recent] = await Promise.all([
+  const [prefs, totals, trend, recent, weekly, insightCount] = await Promise.all([
     getPreferences(),
     getTodayTotals(),
     getMacroTrend(14),
     getRecentFoodEntries(30),
+    getWeeklyStats(),
+    getInsightCount(),
   ]);
 
   return (
@@ -25,6 +28,11 @@ export default async function DashboardPage() {
           <StatCard label="Fat" value={totals.fat} target={prefs.fatTarget} unit="g" stagger={3} />
           <StatCard label="Fiber" value={totals.fiber} target={prefs.fiberTarget} unit="g" stagger={4} />
         </div>
+        {insightCount > 0 && (
+          <Link href="/insights" className="mt-3 inline-block text-sm text-[#5b4fa3] hover:underline dark:text-[#bcb2e8]">
+            {insightCount} insight{insightCount === 1 ? "" : "s"} from Hermes →
+          </Link>
+        )}
       </section>
 
       <section>
@@ -41,6 +49,46 @@ export default async function DashboardPage() {
             Add entry
           </button>
         </form>
+      </section>
+
+      <section>
+        <h2 className={`mb-4 ${headingClass}`}>This week</h2>
+        <div className={`space-y-2 p-6 text-sm ${cardClass}`}>
+          {weekly.daysLogged === 0 ? (
+            <p className="text-[var(--muted)]">No entries logged yet this week.</p>
+          ) : (
+            <>
+              <div className="flex justify-between">
+                <span className="text-[var(--muted)]">Days logged</span>
+                <span>{weekly.daysLogged} / 7</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[var(--muted)]">Avg calories</span>
+                <span>{Math.round(weekly.avgCalories)} kcal</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[var(--muted)]">Avg protein</span>
+                <span>{Math.round(weekly.avgProtein)} g</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[var(--muted)]">Protein under target</span>
+                <span>{weekly.proteinUnderTargetDays} of {weekly.daysLogged} days</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[var(--muted)]">Fiber under target</span>
+                <span className={weekly.fiberUnderTargetDays > 0 ? "text-[#956400] dark:text-[#e8c567]" : ""}>
+                  {weekly.fiberUnderTargetDays} of {weekly.daysLogged} days
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[var(--muted)]">Workouts</span>
+                <span>
+                  {weekly.workoutsThisWeek} this week <span className="text-[var(--muted)]">(vs {weekly.workoutsLastWeek} last)</span>
+                </span>
+              </div>
+            </>
+          )}
+        </div>
       </section>
 
       <section>

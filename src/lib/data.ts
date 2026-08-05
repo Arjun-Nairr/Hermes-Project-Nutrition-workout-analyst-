@@ -1,7 +1,7 @@
 // Typed DB writes shared between the website's server actions (FormData in)
 // and the MCP server (typed args in) — one place owns the actual insert logic.
 import { db } from "@/db";
-import { foodEntries, workoutEntries, preferences } from "@/db/schema";
+import { foodEntries, workoutEntries, preferences, insights } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getPreferences } from "./queries";
 
@@ -42,5 +42,10 @@ export async function updatePreferencesData(input: Partial<{
 }>) {
   await getPreferences(); // ensures the single row exists before updating it
   const [row] = await db.update(preferences).set(input).where(eq(preferences.id, 1)).returning();
+  return row;
+}
+
+export async function createInsight(content: string) {
+  const [row] = await db.insert(insights).values({ content }).returning();
   return row;
 }

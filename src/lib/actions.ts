@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { foodEntries } from "@/db/schema";
+import { foodEntries, insights } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { createFoodEntry, createWorkoutEntry, updatePreferencesData } from "./data";
@@ -51,5 +51,11 @@ export async function updatePreferences(formData: FormData) {
     trainingStyle: String(formData.get("trainingStyle") ?? ""),
   });
   revalidatePath("/preferences");
+  revalidatePath("/");
+}
+
+export async function dismissInsight(id: number) {
+  await db.delete(insights).where(eq(insights.id, id));
+  revalidatePath("/insights");
   revalidatePath("/");
 }

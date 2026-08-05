@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { foodEntries, workoutEntries, preferences } from "@/db/schema";
+import { foodEntries, workoutEntries, preferences, insights } from "@/db/schema";
 import { desc, gte } from "drizzle-orm";
 import { startOfTodayIST, daysAgoIST, istDateKey } from "./dates";
 
@@ -69,4 +69,51 @@ export async function getMacroTrend(days = 14) {
 
 export async function getRecentWorkouts(limit = 20) {
   return db.select().from(workoutEntries).orderBy(desc(workoutEntries.timestamp)).limit(limit);
+}
+
+export async function getRecentInsights(limit = 20) {
+  return db.select().from(insights).orderBy(desc(insights.timestamp)).limit(limit);
+}
+
+export async function getInsightCount() {
+  const rows = await db.select({ id: insights.id }).from(insights);
+  return rows.length;
+}
+
+// Rule-based weekly summary — computed straight from logged data, no LLM.
+// Averages are over days something was actually logged (a day you forgot to
+// log shouldn't drag the average down and look like you under-ate).
+export async function getWeeklyStats() {
+  const [trend, prefs, workoutRows] = await Promise.all([
+    getMacroTrend(7),
+    getPreferences(),
+    db.select({ timestamp: workoutEntries.timestamp }).from(workoutEntries).where(gte(workoutEntries.timestamp, daysAgoIST(13))),
+  ]);
+
+  const loggedDays = trend.filter((d) => d.calories > 0);
+  const n = loggedDays.length || 1;
+  const avg = (key: keyof DailyTotals) => loggedDays.reduce((sum, d) => sum + d[key], 0) / n;
+
+  const underTargetDays = (key: keyof DailyTotals, target: number) =>
+    loggedDays.filter((d) => d[key] < target).length;
+  const overTargetDays = (key: keyof DailyTotals, target: number) =>
+    loggedDays.filter((d) => d[key] > target).length;
+
+  const thisWeekStart = daysAgoIST(6);
+  const workoutsThisWeek = workoutRows.filter((w) => w.timestamp >= thisWeekStart).length;
+  const workoutsLastWeek = workoutRows.length - workoutsThisWeek;
+
+  return {
+    daysLogged: loggedDays.length,
+    avgCalories: avg("calories"),
+    avgProtein: avg("protein"),
+    avgCarbs: avg("carbs"),
+    avgFat: avg("fat"),
+    avgFiber: avg("fiber"),
+    proteinUnderTargetDays: underTargetDays("protein", prefs.proteinTarget),
+    fiberUnderTargetDays: underTargetDays("fiber", prefs.fiberTarget),
+    caloriesOverTargetDays: overTargetDays("calories", prefs.calorieTarget),
+    workoutsThisWeek,
+    workoutsLastWeek,
+  };
 }

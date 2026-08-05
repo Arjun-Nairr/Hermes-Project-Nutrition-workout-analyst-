@@ -20,6 +20,14 @@ export const workoutEntries = pgTable("workout_entries", {
   notes: text("notes"),
 });
 
+// Short notes Hermes pushes when it notices a real pattern worth surfacing.
+// Add-only from Hermes; dismissed (deleted) from the website once read.
+export const insights = pgTable("insights", {
+  id: serial("id").primaryKey(),
+  timestamp: timestamp("timestamp", { withTimezone: true }).notNull().defaultNow(),
+  content: text("content").notNull(),
+});
+
 // Single-row table: always read/write id = 1.
 export const preferences = pgTable("preferences", {
   id: integer("id").primaryKey().default(1),

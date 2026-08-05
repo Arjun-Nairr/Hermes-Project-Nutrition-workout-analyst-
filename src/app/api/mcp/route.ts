@@ -2,6 +2,7 @@ import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
 import { createFoodEntry, createWorkoutEntry, updatePreferencesData } from "@/lib/data";
 import { getPreferences, getTodayTotals } from "@/lib/queries";
+import { searchUsdaFood } from "@/lib/usda";
 
 const handler = createMcpHandler(
   (server) => {
@@ -68,6 +69,23 @@ const handler = createMcpHandler(
       async (input) => {
         const row = await updatePreferencesData(input);
         return { content: [{ type: "text" as const, text: JSON.stringify(row) }] };
+      }
+    );
+
+    server.registerTool(
+      "search_usda_food",
+      {
+        title: "Search USDA FoodData Central",
+        description:
+          "Look up real measured nutrition data for a food/ingredient from USDA FoodData Central. Use this before estimating from memory. Returns a few candidate matches with calories/protein/carbs/fat/fiber per the API's reported serving — check servingSize/dataType before using a value, since generic ('Foundation'/'SR Legacy') results are usually per 100g while 'Branded' results are per labeled serving.",
+        inputSchema: z.object({
+          query: z.string().describe("Food or ingredient name, e.g. 'egg, whole, cooked'"),
+          pageSize: z.number().optional().describe("Max results, default 5"),
+        }),
+      },
+      async ({ query, pageSize }) => {
+        const results = await searchUsdaFood(query, pageSize);
+        return { content: [{ type: "text" as const, text: JSON.stringify(results) }] };
       }
     );
 

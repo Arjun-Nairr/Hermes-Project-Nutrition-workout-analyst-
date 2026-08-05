@@ -1,6 +1,6 @@
 import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
-import { createFoodEntry, createWorkoutEntry } from "@/lib/data";
+import { createFoodEntry, createWorkoutEntry, updatePreferencesData } from "@/lib/data";
 import { getPreferences, getTodayTotals } from "@/lib/queries";
 
 const handler = createMcpHandler(
@@ -44,6 +44,28 @@ const handler = createMcpHandler(
           notes: notes ?? null,
         });
         return { content: [{ type: "text" as const, text: "Logged." }] };
+      }
+    );
+
+    server.registerTool(
+      "update_preferences",
+      {
+        title: "Update preferences",
+        description:
+          "Update the user's calorie/macro targets, goal, or training info. Only pass the fields that changed — anything omitted keeps its current value. Use this after a first-run setup conversation, or whenever the user explicitly asks to change a target/goal.",
+        inputSchema: z.object({
+          calorieTarget: z.number().optional(),
+          proteinTarget: z.number().optional().describe("grams"),
+          carbsTarget: z.number().optional().describe("grams"),
+          fatTarget: z.number().optional().describe("grams"),
+          goal: z.enum(["cut", "maintain", "bulk"]).optional(),
+          trainingDays: z.string().optional().describe("e.g. 'Mon/Wed/Fri'"),
+          trainingStyle: z.string().optional().describe("e.g. 'HIT, full body'"),
+        }),
+      },
+      async (input) => {
+        const row = await updatePreferencesData(input);
+        return { content: [{ type: "text" as const, text: JSON.stringify(row) }] };
       }
     );
 

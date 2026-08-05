@@ -1,10 +1,10 @@
 "use server";
 
 import { db } from "@/db";
-import { foodEntries, preferences } from "@/db/schema";
+import { foodEntries } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { createFoodEntry, createWorkoutEntry } from "./data";
+import { createFoodEntry, createWorkoutEntry, updatePreferencesData } from "./data";
 
 function num(formData: FormData, key: string): number {
   return Number(formData.get(key) ?? 0);
@@ -39,30 +39,15 @@ export async function addWorkoutEntry(formData: FormData) {
 }
 
 export async function updatePreferences(formData: FormData) {
-  await db
-    .insert(preferences)
-    .values({
-      id: 1,
-      calorieTarget: num(formData, "calorieTarget"),
-      proteinTarget: num(formData, "proteinTarget"),
-      carbsTarget: num(formData, "carbsTarget"),
-      fatTarget: num(formData, "fatTarget"),
-      goal: String(formData.get("goal") ?? "maintain"),
-      trainingDays: String(formData.get("trainingDays") ?? ""),
-      trainingStyle: String(formData.get("trainingStyle") ?? ""),
-    })
-    .onConflictDoUpdate({
-      target: preferences.id,
-      set: {
-        calorieTarget: num(formData, "calorieTarget"),
-        proteinTarget: num(formData, "proteinTarget"),
-        carbsTarget: num(formData, "carbsTarget"),
-        fatTarget: num(formData, "fatTarget"),
-        goal: String(formData.get("goal") ?? "maintain"),
-        trainingDays: String(formData.get("trainingDays") ?? ""),
-        trainingStyle: String(formData.get("trainingStyle") ?? ""),
-      },
-    });
+  await updatePreferencesData({
+    calorieTarget: num(formData, "calorieTarget"),
+    proteinTarget: num(formData, "proteinTarget"),
+    carbsTarget: num(formData, "carbsTarget"),
+    fatTarget: num(formData, "fatTarget"),
+    goal: String(formData.get("goal") ?? "maintain"),
+    trainingDays: String(formData.get("trainingDays") ?? ""),
+    trainingStyle: String(formData.get("trainingStyle") ?? ""),
+  });
   revalidatePath("/preferences");
   revalidatePath("/");
 }

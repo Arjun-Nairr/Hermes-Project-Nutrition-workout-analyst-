@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { foodEntries, workoutEntries, preferences, insights } from "@/db/schema";
 import { desc, gte } from "drizzle-orm";
-import { startOfTodayIST, daysAgoIST, istDateKey } from "./dates";
+import { startOfTodayLocal, daysAgoLocal, localDateKey } from "./dates";
 
 export async function getPreferences() {
   const rows = await db.select().from(preferences).limit(1);
@@ -15,7 +15,7 @@ export async function getTodayFoodEntries() {
   return db
     .select()
     .from(foodEntries)
-    .where(gte(foodEntries.timestamp, startOfTodayIST()))
+    .where(gte(foodEntries.timestamp, startOfTodayLocal()))
     .orderBy(desc(foodEntries.timestamp));
 }
 
@@ -44,11 +44,11 @@ export async function getMacroTrend(days = 14) {
   const rows = await db
     .select()
     .from(foodEntries)
-    .where(gte(foodEntries.timestamp, daysAgoIST(days - 1)));
+    .where(gte(foodEntries.timestamp, daysAgoLocal(days - 1)));
 
   const byDay = new Map<string, DailyTotals>();
   for (const e of rows) {
-    const key = istDateKey(e.timestamp);
+    const key = localDateKey(e.timestamp);
     const cur = byDay.get(key) ?? { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
     cur.calories += e.calories;
     cur.protein += e.protein;
@@ -60,7 +60,7 @@ export async function getMacroTrend(days = 14) {
 
   const out: ({ date: string } & DailyTotals)[] = [];
   for (let i = days - 1; i >= 0; i--) {
-    const key = istDateKey(daysAgoIST(i));
+    const key = localDateKey(daysAgoLocal(i));
     const totals = byDay.get(key) ?? { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
     out.push({ date: key, ...totals });
   }
@@ -87,7 +87,7 @@ export async function getWeeklyStats() {
   const [trend, prefs, workoutRows] = await Promise.all([
     getMacroTrend(7),
     getPreferences(),
-    db.select({ timestamp: workoutEntries.timestamp }).from(workoutEntries).where(gte(workoutEntries.timestamp, daysAgoIST(13))),
+    db.select({ timestamp: workoutEntries.timestamp }).from(workoutEntries).where(gte(workoutEntries.timestamp, daysAgoLocal(13))),
   ]);
 
   const loggedDays = trend.filter((d) => d.calories > 0);
@@ -99,7 +99,7 @@ export async function getWeeklyStats() {
   const overTargetDays = (key: keyof DailyTotals, target: number) =>
     loggedDays.filter((d) => d[key] > target).length;
 
-  const thisWeekStart = daysAgoIST(6);
+  const thisWeekStart = daysAgoLocal(6);
   const workoutsThisWeek = workoutRows.filter((w) => w.timestamp >= thisWeekStart).length;
   const workoutsLastWeek = workoutRows.length - workoutsThisWeek;
 

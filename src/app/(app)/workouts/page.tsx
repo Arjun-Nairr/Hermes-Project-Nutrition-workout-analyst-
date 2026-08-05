@@ -1,6 +1,7 @@
 import { getRecentWorkouts } from "@/lib/queries";
 import { addWorkoutEntry } from "@/lib/actions";
 import { inputClass, buttonClass, cardClass, headingClass, badgeClass } from "@/lib/ui";
+import { APP_TIMEZONE } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export default async function WorkoutsPage() {
             >
               <p className="text-[var(--foreground)]">{w.exercise}</p>
               <p className="mt-1 text-xs text-[var(--muted)]">
-                {new Date(w.timestamp).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                {new Date(w.timestamp).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: APP_TIMEZONE })}
                 {w.notes && ` · ${w.notes}`}
               </p>
               {(w.weight != null || w.reps != null) && (

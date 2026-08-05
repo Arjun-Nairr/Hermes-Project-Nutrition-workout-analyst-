@@ -4,6 +4,7 @@ import { addFoodEntry, deleteFoodEntry } from "@/lib/actions";
 import { StatCard } from "@/components/StatCard";
 import { MacroTrendChart } from "@/components/MacroTrendChart";
 import { inputClass, buttonClass, cardClass, headingClass, badgeClass } from "@/lib/ui";
+import { APP_TIMEZONE } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
@@ -113,7 +114,7 @@ export default async function DashboardPage() {
               <div>
                 <p className="text-[var(--foreground)]">{e.description}</p>
                 <p className="mt-1 text-xs text-[var(--muted)]">
-                  {new Date(e.timestamp).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                  {new Date(e.timestamp).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: APP_TIMEZONE })}
                 </p>
                 <div className="mt-1.5 flex gap-1.5">
                   <span className={badgeClass("calories")}>{e.calories} kcal</span>

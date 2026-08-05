@@ -1,6 +1,7 @@
 import { getRecentInsights } from "@/lib/queries";
 import { dismissInsight } from "@/lib/actions";
 import { cardClass, headingClass } from "@/lib/ui";
+import { APP_TIMEZONE } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export default async function InsightsPage() {
             <div>
               <p className="text-[var(--foreground)]">{item.content}</p>
               <p className="mt-1.5 text-xs text-[#5b4fa3] dark:text-[#bcb2e8]">
-                {new Date(item.timestamp).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                {new Date(item.timestamp).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short", timeZone: APP_TIMEZONE })}
               </p>
             </div>
             <form action={dismissInsight.bind(null, item.id)}>

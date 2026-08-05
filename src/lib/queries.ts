@@ -27,14 +27,17 @@ export async function getTodayTotals() {
       protein: acc.protein + e.protein,
       carbs: acc.carbs + e.carbs,
       fat: acc.fat + e.fat,
+      fiber: acc.fiber + e.fiber,
     }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+    { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 }
   );
 }
 
 export async function getRecentFoodEntries(limit = 30) {
   return db.select().from(foodEntries).orderBy(desc(foodEntries.timestamp)).limit(limit);
 }
+
+type DailyTotals = { calories: number; protein: number; carbs: number; fat: number; fiber: number };
 
 // Daily macro totals for the last N days, oldest first — feeds the trend chart.
 export async function getMacroTrend(days = 14) {
@@ -43,21 +46,22 @@ export async function getMacroTrend(days = 14) {
     .from(foodEntries)
     .where(gte(foodEntries.timestamp, daysAgoIST(days - 1)));
 
-  const byDay = new Map<string, { calories: number; protein: number; carbs: number; fat: number }>();
+  const byDay = new Map<string, DailyTotals>();
   for (const e of rows) {
     const key = istDateKey(e.timestamp);
-    const cur = byDay.get(key) ?? { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    const cur = byDay.get(key) ?? { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
     cur.calories += e.calories;
     cur.protein += e.protein;
     cur.carbs += e.carbs;
     cur.fat += e.fat;
+    cur.fiber += e.fiber;
     byDay.set(key, cur);
   }
 
-  const out: { date: string; calories: number; protein: number; carbs: number; fat: number }[] = [];
+  const out: ({ date: string } & DailyTotals)[] = [];
   for (let i = days - 1; i >= 0; i--) {
     const key = istDateKey(daysAgoIST(i));
-    const totals = byDay.get(key) ?? { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    const totals = byDay.get(key) ?? { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
     out.push({ date: key, ...totals });
   }
   return out;

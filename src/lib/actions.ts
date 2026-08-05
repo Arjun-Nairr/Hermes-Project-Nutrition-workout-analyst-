@@ -17,6 +17,7 @@ export async function addFoodEntry(formData: FormData) {
     protein: num(formData, "protein"),
     carbs: num(formData, "carbs"),
     fat: num(formData, "fat"),
+    fiber: num(formData, "fiber"),
   });
   revalidatePath("/");
 }
@@ -44,6 +45,7 @@ export async function updatePreferences(formData: FormData) {
     proteinTarget: num(formData, "proteinTarget"),
     carbsTarget: num(formData, "carbsTarget"),
     fatTarget: num(formData, "fatTarget"),
+    fiberTarget: num(formData, "fiberTarget"),
     goal: String(formData.get("goal") ?? "maintain"),
     trainingDays: String(formData.get("trainingDays") ?? ""),
     trainingStyle: String(formData.get("trainingStyle") ?? ""),

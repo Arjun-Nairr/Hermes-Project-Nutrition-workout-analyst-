@@ -11,7 +11,7 @@ export default async function PreferencesPage() {
     <div>
       <h1 className={`mb-4 ${headingClass}`}>Preferences</h1>
       <form action={updatePreferences} className={`space-y-6 p-6 ${cardClass}`}>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
           <label className="text-sm">
             <span className={labelClass}>Calories</span>
             <input name="calorieTarget" type="number" defaultValue={prefs.calorieTarget} className={`w-full ${inputClass}`} />
@@ -27,6 +27,10 @@ export default async function PreferencesPage() {
           <label className="text-sm">
             <span className={labelClass}>Fat (g)</span>
             <input name="fatTarget" type="number" defaultValue={prefs.fatTarget} className={`w-full ${inputClass}`} />
+          </label>
+          <label className="text-sm">
+            <span className={labelClass}>Fiber (g)</span>
+            <input name="fiberTarget" type="number" defaultValue={prefs.fiberTarget} className={`w-full ${inputClass}`} />
           </label>
         </div>
 

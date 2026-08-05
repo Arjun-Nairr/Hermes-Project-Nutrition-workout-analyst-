@@ -16,10 +16,11 @@ const handler = createMcpHandler(
           protein: z.number().describe("Estimated protein in grams"),
           carbs: z.number().describe("Estimated carbs in grams"),
           fat: z.number().describe("Estimated fat in grams"),
+          fiber: z.number().optional().describe("Estimated fiber in grams"),
         }),
       },
-      async ({ description, calories, protein, carbs, fat }) => {
-        await createFoodEntry({ description, calories, protein, carbs, fat });
+      async ({ description, calories, protein, carbs, fat, fiber }) => {
+        await createFoodEntry({ description, calories, protein, carbs, fat, fiber });
         return { content: [{ type: "text" as const, text: "Logged." }] };
       }
     );
@@ -58,6 +59,7 @@ const handler = createMcpHandler(
           proteinTarget: z.number().optional().describe("grams"),
           carbsTarget: z.number().optional().describe("grams"),
           fatTarget: z.number().optional().describe("grams"),
+          fiberTarget: z.number().optional().describe("grams"),
           goal: z.enum(["cut", "maintain", "bulk"]).optional(),
           trainingDays: z.string().optional().describe("e.g. 'Mon/Wed/Fri'"),
           trainingStyle: z.string().optional().describe("e.g. 'HIT, full body'"),

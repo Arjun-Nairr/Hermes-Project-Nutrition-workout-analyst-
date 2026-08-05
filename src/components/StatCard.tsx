@@ -5,6 +5,7 @@ const macroKeyFor = {
   Protein: "protein",
   Carbs: "carbs",
   Fat: "fat",
+  Fiber: "fiber",
 } as const;
 
 export function StatCard({

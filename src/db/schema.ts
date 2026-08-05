@@ -7,6 +7,7 @@ export const foodEntries = pgTable("food_entries", {
   protein: real("protein").notNull(),
   carbs: real("carbs").notNull(),
   fat: real("fat").notNull(),
+  fiber: real("fiber").notNull().default(0),
   description: text("description").notNull(),
 });
 
@@ -26,6 +27,7 @@ export const preferences = pgTable("preferences", {
   proteinTarget: integer("protein_target").notNull().default(150),
   carbsTarget: integer("carbs_target").notNull().default(200),
   fatTarget: integer("fat_target").notNull().default(65),
+  fiberTarget: integer("fiber_target").notNull().default(30),
   goal: text("goal").notNull().default("maintain"), // 'cut' | 'bulk' | 'maintain'
   trainingDays: text("training_days").notNull().default(""), // free text, e.g. "Mon/Wed/Fri"
   trainingStyle: text("training_style").notNull().default(""), // free text, e.g. "HIT, full body"

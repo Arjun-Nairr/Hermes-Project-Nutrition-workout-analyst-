@@ -11,6 +11,7 @@ export async function createFoodEntry(input: {
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number;
 }) {
   const [row] = await db.insert(foodEntries).values(input).returning();
   return row;
@@ -34,6 +35,7 @@ export async function updatePreferencesData(input: Partial<{
   proteinTarget: number;
   carbsTarget: number;
   fatTarget: number;
+  fiberTarget: number;
   goal: string;
   trainingDays: string;
   trainingStyle: string;

@@ -18,11 +18,12 @@ export default async function DashboardPage() {
     <div className="space-y-12">
       <section>
         <h1 className={`mb-4 ${headingClass}`}>Today</h1>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
           <StatCard label="Calories" value={totals.calories} target={prefs.calorieTarget} unit="kcal" stagger={0} />
           <StatCard label="Protein" value={totals.protein} target={prefs.proteinTarget} unit="g" stagger={1} />
           <StatCard label="Carbs" value={totals.carbs} target={prefs.carbsTarget} unit="g" stagger={2} />
           <StatCard label="Fat" value={totals.fat} target={prefs.fatTarget} unit="g" stagger={3} />
+          <StatCard label="Fiber" value={totals.fiber} target={prefs.fiberTarget} unit="g" stagger={4} />
         </div>
       </section>
 
@@ -35,6 +36,7 @@ export default async function DashboardPage() {
           <input name="protein" type="number" step="0.1" placeholder="protein g" required className={inputClass} />
           <input name="carbs" type="number" step="0.1" placeholder="carbs g" required className={inputClass} />
           <input name="fat" type="number" step="0.1" placeholder="fat g" required className={inputClass} />
+          <input name="fiber" type="number" step="0.1" placeholder="fiber g" defaultValue={0} className={inputClass} />
           <button type="submit" className={`col-span-2 sm:col-span-6 ${buttonClass}`}>
             Add entry
           </button>
@@ -70,6 +72,7 @@ export default async function DashboardPage() {
                   <span className={badgeClass("protein")}>P{e.protein}</span>
                   <span className={badgeClass("carbs")}>C{e.carbs}</span>
                   <span className={badgeClass("fat")}>F{e.fat}</span>
+                  <span className={badgeClass("fiber")}>Fi{e.fiber}</span>
                 </div>
               </div>
               <form action={deleteFoodEntry.bind(null, e.id)}>

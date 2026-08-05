@@ -26,6 +26,7 @@ export const macroAccents = {
   protein: { solid: "#2f8fc7", badge: "bg-[#e1f3fe] text-[#1f6c9f] dark:bg-[#132a36] dark:text-[#8fcbef]" },
   carbs: { solid: "#c99a1f", badge: "bg-[#fbf3db] text-[#956400] dark:bg-[#332707] dark:text-[#e8c567]" },
   fat: { solid: "#c4514f", badge: "bg-[#fdebec] text-[#9f2f2d] dark:bg-[#3a1f1f] dark:text-[#f3a6a3]" },
+  fiber: { solid: "#7c6fc4", badge: "bg-[#efedfb] text-[#5b4fa3] dark:bg-[#241f38] dark:text-[#bcb2e8]" },
 } as const;
 
 export function badgeClass(macro: keyof typeof macroAccents) {

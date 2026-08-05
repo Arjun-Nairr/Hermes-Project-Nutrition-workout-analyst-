@@ -6,12 +6,18 @@ import { macroAccents } from "@/lib/ui";
 
 type Point = { date: string; calories: number; protein: number; carbs: number; fat: number; fiber: number };
 
-export function MacroTrendChart({ data }: { data: Point[] }) {
+export function MacroTrendChart({ data, calorieTarget }: { data: Point[]; calorieTarget: number }) {
   const isDark = useIsDark();
   const grid = isDark ? "#2c2c2c" : "#eaeaea";
   const muted = isDark ? "#9a9994" : "#787774";
   const surface = isDark ? "#1a1a1a" : "#ffffff";
   const foreground = isDark ? "#f2f1ee" : "#111111";
+
+  // Scale to the target, not just whatever's been logged so far — otherwise a
+  // light day makes the axis look tiny instead of showing real headroom.
+  // Rounds up to the next 500 (e.g. a 1850 target -> 2000 on the axis).
+  const dataMax = Math.max(0, ...data.map((d) => d.calories));
+  const kcalMax = Math.ceil(Math.max(calorieTarget, dataMax) / 500) * 500;
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -29,6 +35,7 @@ export function MacroTrendChart({ data }: { data: Point[] }) {
             once calories climb toward a real daily total. Two axes fixes it. */}
         <YAxis
           yAxisId="kcal"
+          domain={[0, kcalMax]}
           tick={{ fontSize: 12, fill: muted }}
           axisLine={false}
           tickLine={false}

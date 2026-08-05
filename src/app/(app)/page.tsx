@@ -46,7 +46,7 @@ export default async function DashboardPage() {
       <section>
         <h2 className={`mb-4 ${headingClass}`}>Macro trend</h2>
         <div className={`p-6 ${cardClass}`}>
-          <MacroTrendChart data={trend} />
+          <MacroTrendChart data={trend} calorieTarget={prefs.calorieTarget} />
         </div>
       </section>
 

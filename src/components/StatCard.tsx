@@ -1,7 +1,6 @@
-import { cardClass, macroAccents } from "@/lib/ui";
+import { cardClass, macroAccents, badgeClass, dangerBadgeClass, dangerTextClass } from "@/lib/ui";
 
 const macroKeyFor = {
-  Calories: "calories",
   Protein: "protein",
   Carbs: "carbs",
   Fat: "fat",
@@ -35,15 +34,7 @@ export function StatCard({
     >
       <div className="flex items-center justify-between">
         <p className="text-xs uppercase tracking-wide text-[var(--muted)]">{label}</p>
-        <span
-          className={
-            isOver
-              ? "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide bg-[#fdebec] text-[#9f2f2d] dark:bg-[#3a1f1f] dark:text-[#f3a6a3]"
-              : `inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${macroAccents[macro].badge}`
-          }
-        >
-          {pct}%
-        </span>
+        <span className={isOver ? dangerBadgeClass : badgeClass(macro)}>{pct}%</span>
       </div>
       <p className="mt-2 font-mono text-2xl tabular-nums text-[var(--foreground)]">
         {Math.round(value)}
@@ -55,7 +46,7 @@ export function StatCard({
           style={{ width: `${barPct}%`, backgroundColor: isOver ? "var(--fat-danger)" : accent }}
         />
       </div>
-      <p className={`mt-2 text-xs ${isOver ? "text-[#9f2f2d] dark:text-[#f3a6a3]" : "text-[var(--muted)]"}`}>
+      <p className={`mt-2 text-xs ${isOver ? dangerTextClass : "text-[var(--muted)]"}`}>
         {remaining >= 0 ? `${Math.round(remaining)} ${unit} left` : `${Math.round(-remaining)} ${unit} over`}
       </p>
     </div>

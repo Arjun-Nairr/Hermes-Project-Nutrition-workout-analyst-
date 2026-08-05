@@ -33,10 +33,6 @@ export async function getTodayTotals() {
   );
 }
 
-export async function getRecentFoodEntries(limit = 30) {
-  return db.select().from(foodEntries).orderBy(desc(foodEntries.timestamp)).limit(limit);
-}
-
 type DailyTotals = { calories: number; protein: number; carbs: number; fat: number; fiber: number };
 
 // Daily macro totals for the last N days, oldest first — feeds the trend chart.

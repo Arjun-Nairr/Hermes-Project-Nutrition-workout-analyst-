@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { logout } from "./logout-action";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BottomNav } from "@/components/BottomNav";
+import { RefreshButton } from "@/components/RefreshButton";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -12,7 +13,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="border-b border-[var(--border)] bg-[var(--surface)]">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
           <span className="font-serif text-lg text-[var(--foreground)]">Calorie Tracker</span>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <RefreshButton />
             <ThemeToggle initialDark={initialDark} />
             <form action={logout}>
               <button className="whitespace-nowrap py-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)]">

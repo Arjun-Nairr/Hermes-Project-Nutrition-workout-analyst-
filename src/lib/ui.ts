@@ -32,3 +32,9 @@ export const macroAccents = {
 export function badgeClass(macro: keyof typeof macroAccents) {
   return `inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${macroAccents[macro].badge}`;
 }
+
+// Shared "over target" styling — used by StatCard, CalorieRing, and This
+// week's mini-bars whenever a value has crossed its target.
+export const dangerBadgeClass =
+  "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide bg-[#fdebec] text-[#9f2f2d] dark:bg-[#3a1f1f] dark:text-[#f3a6a3]";
+export const dangerTextClass = "text-[#9f2f2d] dark:text-[#f3a6a3]";

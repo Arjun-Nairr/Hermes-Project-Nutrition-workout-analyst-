@@ -66,7 +66,7 @@ export default async function DashboardPage() {
           <input name="protein" type="number" step="0.1" placeholder="protein g" required className={inputClass} />
           <input name="carbs" type="number" step="0.1" placeholder="carbs g" required className={inputClass} />
           <input name="fat" type="number" step="0.1" placeholder="fat g" required className={inputClass} />
-          <input name="fiber" type="number" step="0.1" placeholder="fiber g" defaultValue={0} className={inputClass} />
+          <input name="fiber" type="number" step="0.1" placeholder="fiber g" className={inputClass} />
           <button type="submit" className={`col-span-2 ${buttonClass}`}>
             Add entry
           </button>

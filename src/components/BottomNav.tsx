@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLinkStatus } from "next/link";
 
 const tabs = [
   { href: "/", label: "Dashboard" },
@@ -9,6 +10,18 @@ const tabs = [
   { href: "/workouts", label: "Workouts" },
   { href: "/preferences", label: "Preferences" },
 ];
+
+// Per-tab pending state from Next's own Link transition — pure client-side,
+// no server Suspense/streaming involved (that path is what hung, see
+// loading.tsx revert). Only the tapped tab shows a spinner in place of its
+// label while its own navigation is in flight.
+function TabLabel({ label }: { label: string }) {
+  const { pending } = useLinkStatus();
+  if (pending) {
+    return <span className="h-3 w-3 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--foreground)]" />;
+  }
+  return <>{label}</>;
+}
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -29,7 +42,7 @@ export function BottomNav() {
                 active ? "text-[var(--foreground)]" : "text-[var(--muted)]"
               }`}
             >
-              {tab.label}
+              <TabLabel label={tab.label} />
               <span
                 className="h-0.5 w-8 rounded-full"
                 style={{ backgroundColor: active ? "var(--primary)" : "transparent" }}

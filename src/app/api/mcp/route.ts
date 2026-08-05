@@ -1,7 +1,7 @@
 import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
 import { createFoodEntry, createWorkoutEntry, updatePreferencesData, createInsight } from "@/lib/data";
-import { getPreferences, getTodayTotals } from "@/lib/queries";
+import { getPreferences, getTodayTotals, getWeeklyStats, getRecentInsights } from "@/lib/queries";
 import { searchUsdaFood } from "@/lib/usda";
 
 const handler = createMcpHandler(
@@ -110,14 +110,30 @@ const handler = createMcpHandler(
       {
         title: "Get today's status",
         description:
-          "Fetch today's running totals vs targets, plus goal and training preferences. Call this before estimating a new entry.",
+          "Fetch today's running totals vs targets, this week's pattern (averages, under/over-target day counts, workout counts), and goal/training preferences. Call this before estimating a new entry, and before deciding whether to post_insight.",
         inputSchema: z.object({}),
       },
       async () => {
-        const [prefs, totals] = await Promise.all([getPreferences(), getTodayTotals()]);
+        const [prefs, today, week] = await Promise.all([getPreferences(), getTodayTotals(), getWeeklyStats()]);
         return {
-          content: [{ type: "text" as const, text: JSON.stringify({ preferences: prefs, today: totals }) }],
+          content: [{ type: "text" as const, text: JSON.stringify({ preferences: prefs, today, week }) }],
         };
+      }
+    );
+
+    server.registerTool(
+      "get_recent_insights",
+      {
+        title: "Get recent insights",
+        description:
+          "Fetch the insights already posted (most recent first, with timestamps). Check this before post_insight to avoid posting a duplicate or re-flagging something already said — e.g. don't post again today if you already posted an insight today.",
+        inputSchema: z.object({
+          limit: z.number().optional().describe("Max results, default 10"),
+        }),
+      },
+      async ({ limit }) => {
+        const rows = await getRecentInsights(limit ?? 10);
+        return { content: [{ type: "text" as const, text: JSON.stringify(rows) }] };
       }
     );
   },

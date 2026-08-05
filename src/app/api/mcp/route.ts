@@ -1,6 +1,6 @@
 import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
-import { createFoodEntry, createWorkoutEntry, updatePreferencesData, createInsight } from "@/lib/data";
+import { createFoodEntry, createWorkoutEntry, updatePreferencesData, createInsight, MAX_UNDISMISSED_INSIGHTS } from "@/lib/data";
 import { getPreferences, getTodayTotals, getWeeklyStats, getRecentInsights } from "@/lib/queries";
 import { searchUsdaFood } from "@/lib/usda";
 
@@ -94,13 +94,23 @@ const handler = createMcpHandler(
       {
         title: "Post insight",
         description:
-          "Push a short, specific insight to the user's dashboard (a separate Insights tab, not the main page) — for real patterns you've actually noticed in their logged data, not generic advice. Examples: a macro consistently under/over target across several days, a fatigue/diet correlation you found, a workout progression note. Don't post one for every message — only when there's something genuinely worth surfacing. One or two sentences, plain, specific, actionable.",
+          `Push a short, specific insight to the user's dashboard (a separate Insights tab, not the main page) — for real patterns you've actually noticed in their logged data, not generic advice. Examples: a macro consistently under/over target across several days, a fatigue/diet correlation you found, a workout progression note. Don't post one for every message — only when there's something genuinely worth surfacing. One or two sentences, plain, specific, actionable. Capped at ${MAX_UNDISMISSED_INSIGHTS} undismissed at once — if you hit the cap, this tool will tell you, don't retry.`,
         inputSchema: z.object({
           content: z.string().describe("The insight text, 1-2 sentences"),
         }),
       },
       async ({ content }) => {
-        await createInsight(content);
+        const row = await createInsight(content);
+        if (!row) {
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: `Not posted — already ${MAX_UNDISMISSED_INSIGHTS} undismissed insights. The user needs to dismiss some on the Insights tab before more can be posted.`,
+              },
+            ],
+          };
+        }
         return { content: [{ type: "text" as const, text: "Posted." }] };
       }
     );

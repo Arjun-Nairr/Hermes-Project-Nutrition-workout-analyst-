@@ -45,7 +45,16 @@ export async function updatePreferencesData(input: Partial<{
   return row;
 }
 
+// Hard cap enforced in code, not just instructed — a skill-file instruction
+// ("don't post duplicates") is a suggestion the model might not always
+// follow; this is the actual guarantee against pileup.
+export const MAX_UNDISMISSED_INSIGHTS = 5;
+
 export async function createInsight(content: string) {
+  const existing = await db.select({ id: insights.id }).from(insights);
+  if (existing.length >= MAX_UNDISMISSED_INSIGHTS) {
+    return null;
+  }
   const [row] = await db.insert(insights).values({ content }).returning();
   return row;
 }

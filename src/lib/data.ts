@@ -2,7 +2,7 @@
 // and the MCP server (typed args in) — one place owns the actual insert logic.
 import { db } from "@/db";
 import { foodEntries, workoutEntries, preferences, insights } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import { getPreferences } from "./queries";
 
 export async function createFoodEntry(input: {
@@ -47,13 +47,17 @@ export async function updatePreferencesData(input: Partial<{
 
 // Hard cap enforced in code, not just instructed — a skill-file instruction
 // ("don't post duplicates") is a suggestion the model might not always
-// follow; this is the actual guarantee against pileup.
+// follow; this is the actual guarantee against pileup. FIFO, not a flat
+// reject: at roughly one insight/day, a reject-past-cap policy would silently
+// drop 2 of every 7 days' worth once the cap fills, since nothing would ever
+// free up a slot on its own. Evicting the oldest guarantees the 5 most
+// recent are always the ones available, nothing gets lost to a full queue.
 export const MAX_UNDISMISSED_INSIGHTS = 5;
 
 export async function createInsight(content: string) {
-  const existing = await db.select({ id: insights.id }).from(insights);
+  const existing = await db.select({ id: insights.id }).from(insights).orderBy(asc(insights.timestamp));
   if (existing.length >= MAX_UNDISMISSED_INSIGHTS) {
-    return null;
+    await db.delete(insights).where(eq(insights.id, existing[0].id));
   }
   const [row] = await db.insert(insights).values({ content }).returning();
   return row;

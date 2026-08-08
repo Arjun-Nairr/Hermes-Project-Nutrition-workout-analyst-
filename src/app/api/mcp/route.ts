@@ -94,23 +94,13 @@ const handler = createMcpHandler(
       {
         title: "Post insight",
         description:
-          `Push a short, specific insight to the user's dashboard (a separate Insights tab, not the main page) — for real patterns you've actually noticed in their logged data, not generic advice. Examples: a macro consistently under/over target across several days, a fatigue/diet correlation you found, a workout progression note. Don't post one for every message — only when there's something genuinely worth surfacing. One or two sentences, plain, specific, actionable. Capped at ${MAX_UNDISMISSED_INSIGHTS} undismissed at once — if you hit the cap, this tool will tell you, don't retry.`,
+          `Push a short, specific insight to the user's dashboard (a separate Insights tab, not the main page) — for real patterns you've actually noticed in their logged data, not generic advice. Examples: a macro consistently under/over target across several days, a fatigue/diet correlation you found, a workout progression note. Don't post one for every message — only when there's something genuinely worth surfacing. One or two sentences, plain, specific, actionable. Capped at ${MAX_UNDISMISSED_INSIGHTS} undismissed at once — posting past the cap silently replaces the single oldest one (FIFO), so the 5 shown are always the most recent; no need to check capacity first.`,
         inputSchema: z.object({
           content: z.string().describe("The insight text, 1-2 sentences"),
         }),
       },
       async ({ content }) => {
-        const row = await createInsight(content);
-        if (!row) {
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: `Not posted — already ${MAX_UNDISMISSED_INSIGHTS} undismissed insights. The user needs to dismiss some on the Insights tab before more can be posted.`,
-              },
-            ],
-          };
-        }
+        await createInsight(content);
         return { content: [{ type: "text" as const, text: "Posted." }] };
       }
     );
